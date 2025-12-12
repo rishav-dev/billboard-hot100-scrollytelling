@@ -1409,3 +1409,251 @@ const Visualizations = {
   },
 
 };
+// -----------------------------
+// ERA COMPARISON (Grouped Bars)
+// + hover triggers era soundtrack
+// -----------------------------
+// -----------------------------
+// ERA COMPARISON (Grouped Bars)
+// + hover triggers era soundtrack
+// -----------------------------
+Visualizations.renderEraComparison = function (containerId, _data) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <h3 class="chart-title">Era Comparison (Top-10 avg)</h3>
+    <div class="era-hint">Hover over an era to hear its soundscape</div>
+    <svg></svg>
+  `;
+
+  const ERAS = [
+    { key: "2000–2005", start: 2000, end: 2005 },
+    { key: "2006–2011", start: 2006, end: 2011 },
+    { key: "2012–2019", start: 2012, end: 2019 },
+    { key: "2020–2023", start: 2020, end: 2023 },
+  ];
+
+  const METRICS = [
+    { key: "danceability", label: "Danceability" },
+    { key: "energy", label: "Energy" },
+    { key: "valence", label: "Valence" },
+  ];
+
+  const margin = { top: 90, right: 30, bottom: 70, left: 60 };
+  const width = container.clientWidth - margin.left - margin.right;
+  const height = 420 - margin.top - margin.bottom;
+
+
+  d3.select(container).selectAll(".legend, .legend-wrap, .chart-legend").remove();
+
+  // svg element (real <svg>)
+  const svgEl = d3
+    .select(`#${containerId} svg`)
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .html("");
+
+  // plot group (translated by margins)
+  const g = svgEl
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // --- tooltip helpers ---
+  let tooltip = d3.select(container).select(".era-tooltip");
+  if (tooltip.empty()) {
+    tooltip = d3
+      .select(container)
+      .append("div")
+      .attr("class", "era-tooltip")
+      .style("position", "absolute")
+      .style("pointer-events", "none")
+      .style("opacity", 0);
+  }
+
+  function showEraTooltip(event, eraKey) {
+    tooltip
+      .style("opacity", 1)
+      .html(`<strong>${eraKey}</strong><div>Sound preview: 10s</div>`);
+    moveEraTooltip(event);
+  }
+
+  function moveEraTooltip(event) {
+    const rect = container.getBoundingClientRect();
+    const x = event.clientX - rect.left + 12;
+    const y = event.clientY - rect.top + 12;
+    tooltip.style("left", `${x}px`).style("top", `${y}px`);
+  }
+
+  function hideEraTooltip() {
+    tooltip.style("opacity", 0);
+  }
+
+  // Modern palette
+  const color = d3
+    .scaleOrdinal()
+    .domain(METRICS.map((m) => m.key))
+    .range(["#7C83FD", "#2DD4BF", "#FDBA74"]);
+
+  // aggregated yearly series (provided by your data layer)
+  const yearly = {
+    danceability: BillboardData.getAverageByYear("danceability"),
+    energy: BillboardData.getAverageByYear("energy"),
+    valence: BillboardData.getAverageByYear("valence"),
+  };
+
+  const meanInEra = (arr, era) => {
+    const values = arr
+      .filter((d) => d.year >= era.start && d.year <= era.end)
+      .map((d) => d.value)
+      .filter((v) => v !== null && v !== undefined && !Number.isNaN(v));
+    return values.length ? d3.mean(values) : 0;
+  };
+
+  const data = [];
+  ERAS.forEach((era) => {
+    METRICS.forEach((m) => {
+      data.push({
+        era: era.key,
+        metric: m.key,
+        metricLabel: m.label,
+        value: meanInEra(yearly[m.key], era),
+      });
+    });
+  });
+
+  // scales
+  const x0 = d3
+    .scaleBand()
+    .domain(ERAS.map((e) => e.key))
+    .range([0, width])
+    .paddingInner(0.2);
+
+  const x1 = d3
+    .scaleBand()
+    .domain(METRICS.map((m) => m.key))
+    .range([0, x0.bandwidth()])
+    .padding(0.15);
+
+  const y = d3.scaleLinear().domain([0, 1]).range([height, 0]);
+
+  // axes
+  g.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x0))
+    .selectAll("text")
+    .style("font-size", "12px");
+
+  g.append("g").call(d3.axisLeft(y).ticks(5));
+
+  // groups per era
+  const groups = g
+    .selectAll(".era-group")
+    .data(ERAS.map((e) => e.key))
+    .enter()
+    .append("g")
+    .attr("class", "era-group")
+    .attr("transform", (d) => `translate(${x0(d)},0)`);
+
+  // bars
+  groups
+    .selectAll("rect.bar")
+    .data((eraKey) => data.filter((d) => d.era === eraKey))
+    .enter()
+    .append("rect")
+    .attr("class", "bar")
+    .attr("x", (d) => x1(d.metric))
+    .attr("y", height)
+    .attr("width", x1.bandwidth())
+    .attr("height", 0)
+    .attr("fill", (d) => color(d.metric))
+    .attr("opacity", 0.92)
+    .attr("stroke", "rgba(0,0,0,0.14)")
+    .attr("stroke-width", 0.5)
+    .transition()
+    .duration(900)
+    .attr("y", (d) => y(d.value))
+    .attr("height", (d) => height - y(d.value));
+
+  // one hover zone per era (prevents jitter)
+  groups
+    .append("rect")
+    .attr("class", "era-hover-zone")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", x0.bandwidth())
+    .attr("height", height)
+    .attr("fill", "transparent")
+    .style("cursor", "pointer")
+    .on("mouseenter", function (event, eraKey) {
+      if (window.AudioController) window.AudioController.previewEra(eraKey, 10);
+
+      // dim all bars
+      groups.selectAll("rect.bar").attr("opacity", 0.25);
+
+      // highlight current era bars
+      d3.select(this.parentNode).selectAll("rect.bar").attr("opacity", 0.95);
+
+      showEraTooltip(event, eraKey);
+    })
+    .on("mousemove", function (event) {
+      moveEraTooltip(event);
+    })
+    .on("mouseleave", function () {
+      if (window.AudioController) window.AudioController.stop();
+
+      groups.selectAll("rect.bar").attr("opacity", 0.92);
+      hideEraTooltip();
+    });
+
+  // --- legend in SVG header (single, always visible) ---
+  svgEl.selectAll(".legend").remove();
+
+  const legend = svgEl
+    .append("g")
+    .attr("class", "legend")
+    .attr("transform", `translate(${margin.left + width - 190}, 10)`);
+
+  legend
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", 180)
+    .attr("height", 78)
+    .attr("rx", 10)
+    .attr("fill", "white")
+    .attr("stroke", "rgba(0,0,0,0.10)");
+
+  const legendItems = [
+    { label: "Danceability", color: "#7C83FD" },
+    { label: "Energy", color: "#2DD4BF" },
+    { label: "Valence", color: "#FDBA74" },
+  ];
+
+  const legendRow = legend
+    .selectAll(".legend-row")
+    .data(legendItems)
+    .enter()
+    .append("g")
+    .attr("class", "legend-row")
+    .attr("transform", (d, i) => `translate(12, ${14 + i * 22})`);
+
+  legendRow
+    .append("rect")
+    .attr("width", 12)
+    .attr("height", 12)
+    .attr("rx", 3)
+    .attr("fill", (d) => d.color);
+
+  legendRow
+    .append("text")
+    .attr("x", 20)
+    .attr("y", 6)
+    .text((d) => d.label)
+    .attr("font-size", 13)
+    .attr("fill", "#111")
+    .attr("dominant-baseline", "middle");
+
+  legend.raise();
+  legend.style("pointer-events", "none");
+};

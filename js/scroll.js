@@ -2,6 +2,12 @@
 
 const ScrollController = {
   observers: [],
+  visualizations: {},
+
+  // NEW: visibility tracking for "one active section"
+  _visibility: new Map(),
+  _activeSection: null,
+  _audioKey: null,
 
   init() {
     this.setupIntersectionObservers();
@@ -17,31 +23,87 @@ const ScrollController = {
       threshold: [0, 0.25, 0.5, 0.75, 1],
     };
 
+    const pickActive = () => {
+      let bestSection = null;
+      let bestRatio = 0;
+
+      for (const [section, ratio] of this._visibility.entries()) {
+        if (ratio > bestRatio) {
+          bestRatio = ratio;
+          bestSection = section;
+        }
+      }
+
+      // avoid random switching when no section is meaningfully visible
+      if (!bestSection || bestRatio < 0.35) return;
+
+      if (this._activeSection !== bestSection) {
+        this._activeSection = bestSection;
+
+        // Trigger visualization ONLY for the active section
+        this.triggerVisualization(bestSection, bestRatio);
+
+        // Fade-in text content
+        const el = document.querySelector(
+          `.scroll-section[data-section="${bestSection}"]`
+        );
+        const textContent = el?.querySelector(".text-column");
+        if (textContent && !textContent.classList.contains("fade-in")) {
+          textContent.classList.add("fade-in");
+        }
+
+        // NEW: Audio switching (stable)
+        const audioKey = this.mapSectionToAudio(bestSection);
+        if (window.AudioController && audioKey && this._audioKey !== audioKey) {
+          this._audioKey = audioKey;
+          //window.AudioController.playSection(audioKey);
+        }
+      }
+    };
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const section = entry.target.dataset.section;
-          this.triggerVisualization(section, entry.intersectionRatio);
-
-          // Add fade-in class to text content
-          const textContent = entry.target.querySelector(".text-column");
-          if (textContent && !textContent.classList.contains("fade-in")) {
-            textContent.classList.add("fade-in");
-          }
-        }
+        const section = entry.target.dataset.section;
+        const ratio = entry.isIntersecting ? entry.intersectionRatio : 0;
+        this._visibility.set(section, ratio);
       });
+
+      pickActive();
     }, observerOptions);
 
     sections.forEach((section) => observer.observe(section));
     this.observers.push(observer);
   },
 
+  // NEW: map page sections -> soundtrack keys
+  mapSectionToAudio(section) {
+    const map = {
+      intro: "intro",
+      danceability: "early",
+      distribution: "early",
+      trends: "edm",
+      acoustic: "sadpop",
+      "3d-explore": "edm",
+      "timeline-sphere": "edm",
+      "sound-wave": "edm",
+      "data-wave": "edm",
+      "artist-taylor": "early",
+      "artist-drake": "edm",
+      "artist-weeknd": "sadpop",
+      "era-compare": "pandemic",
+      artists: "pandemic",
+      conclusion: "outro",
+    };
+
+    return map[section] || "intro";
+  },
+
   triggerVisualization(section, ratio) {
-    // Trigger specific visualizations based on section
     switch (section) {
       case "intro":
-        // Intro already rendered in main.js
+        // Intro rendered in main.js
         break;
+
       case "danceability":
         if (ratio > 0.3 && !this.visualizations.danceability) {
           Visualizations.renderTrends(
@@ -53,6 +115,7 @@ const ScrollController = {
           this.visualizations.danceability = true;
         }
         break;
+
       case "distribution":
         if (ratio > 0.3 && !this.visualizations.distribution) {
           Visualizations.renderDistribution(
@@ -63,6 +126,7 @@ const ScrollController = {
           this.visualizations.distribution = true;
         }
         break;
+
       case "trends":
         if (ratio > 0.3 && !this.visualizations.trends) {
           Visualizations.renderTrends(
@@ -74,6 +138,7 @@ const ScrollController = {
           this.visualizations.trends = true;
         }
         break;
+
       case "acoustic":
         if (ratio > 0.3 && !this.visualizations.acoustic) {
           Visualizations.renderTrends(
@@ -85,57 +150,71 @@ const ScrollController = {
           this.visualizations.acoustic = true;
         }
         break;
+
       case "3d-explore":
         if (ratio > 0.2 && !this.visualizations.scatter3d) {
           Visualizations.init3DScatter("viz-3d", billboardData);
           this.visualizations.scatter3d = true;
         }
         break;
+
       case "timeline-sphere":
         if (ratio > 0.2 && !this.visualizations.timelineSphere) {
-          Visualizations.initTimelineSphere(
-            "viz-timeline-sphere",
-            billboardData
-          );
+          Visualizations.initTimelineSphere("viz-timeline-sphere", billboardData);
           this.visualizations.timelineSphere = true;
         }
         break;
+
       case "sound-wave":
         if (ratio > 0.2 && !this.visualizations.soundWave) {
           Visualizations.initSoundWave("viz-sound-wave", billboardData);
           this.visualizations.soundWave = true;
         }
         break;
+
       case "data-wave":
         if (ratio > 0.2 && !this.visualizations.dataWave) {
           Visualizations.initDataWave("viz-data-wave", billboardData);
           this.visualizations.dataWave = true;
         }
         break;
+
       case "artist-taylor":
         if (ratio > 0.3 && !this.visualizations.artistTaylor) {
           Visualizations.renderArtistRadar("viz-artist-taylor", "Taylor Swift");
           this.visualizations.artistTaylor = true;
         }
         break;
+
       case "artist-drake":
         if (ratio > 0.3 && !this.visualizations.artistDrake) {
           Visualizations.renderArtistRadar("viz-artist-drake", "Drake");
           this.visualizations.artistDrake = true;
         }
         break;
+
       case "artist-weeknd":
         if (ratio > 0.3 && !this.visualizations.artistWeeknd) {
           Visualizations.renderArtistRadar("viz-artist-weeknd", "The Weeknd");
           this.visualizations.artistWeeknd = true;
         }
         break;
+
+      // NEW: era comparison section
+      case "era-compare":
+        if (ratio > 0.3 && !this.visualizations.eraCompare) {
+          Visualizations.renderEraComparison("viz-era-compare", billboardData);
+          this.visualizations.eraCompare = true;
+        }
+        break;
+
       case "artists":
         if (ratio > 0.3 && !this.visualizations.artists) {
           Visualizations.renderArtistBubbles("viz-artists", billboardData);
           this.visualizations.artists = true;
         }
         break;
+
       case "conclusion":
         if (ratio > 0.3 && !this.visualizations.conclusion) {
           this.renderConclusionChart();
@@ -166,15 +245,8 @@ const ScrollController = {
     const metrics = ["danceability", "energy", "valence", "acousticness"];
     const colors = ["#e85d75", "#4ecdc4", "#ffe66d", "#95e1d3"];
 
-    const x = d3
-      .scaleLinear()
-      .domain([2000, 2023])
-      .range([0, width]);
-
-    const y = d3
-      .scaleLinear()
-      .domain([0, 1])
-      .range([height, 0]);
+    const x = d3.scaleLinear().domain([2000, 2023]).range([0, width]);
+    const y = d3.scaleLinear().domain([0, 1]).range([height, 0]);
 
     const line = d3
       .line()
@@ -194,7 +266,6 @@ const ScrollController = {
         .attr("d", line)
         .attr("opacity", 0.8);
 
-      // Animate
       const pathLength = path.node().getTotalLength();
       path
         .attr("stroke-dasharray", pathLength + " " + pathLength)
@@ -205,7 +276,6 @@ const ScrollController = {
         .ease(d3.easeLinear)
         .attr("stroke-dashoffset", 0);
 
-      // Legend
       svg
         .append("text")
         .attr("x", width + 10)
@@ -221,7 +291,6 @@ const ScrollController = {
         .style("opacity", 1);
     });
 
-    // Axes
     svg
       .append("g")
       .attr("transform", `translate(0,${height})`)
@@ -242,6 +311,4 @@ const ScrollController = {
   setupSmoothScroll() {
     document.documentElement.style.scrollBehavior = "smooth";
   },
-
-  visualizations: {},
 };
