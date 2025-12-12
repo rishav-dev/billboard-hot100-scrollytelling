@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Evolution of Billboard Hot 100 | 2000-2023</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-content">
+      <h1 class="site-title">The Data Story</h1>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-visual">
+      <canvas id="hero-canvas"></canvas>
+    </div>
+    <div class="hero-content">
+      <p class="hero-label">An Exercise in Music Evolution</p>
+      <h1 class="hero-title">How Has Pop Music Changed Over Two Decades?</h1>
+      <p class="hero-author">A Data-Driven Journey Through Billboard Hot 100</p>
+    </div>
+  </section>
+
+  <article class="story">
+    <!-- Introduction Section -->
+    <section class="scroll-section" data-section="intro">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <p class="intro-text">In 2000, the Billboard Hot 100 was dominated by a different sound. Songs had distinct characteristics that set them apart from today's hits.</p>
+          <p>I'm going to explore this evolution with data. I'll be analyzing over 2,400 songs that charted on the Billboard Hot 100 between 2000 and 2023, using audio features from Spotify.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-intro" class="visualization"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="story-core">
+      <h2>The Sound of Change</h2>
+      <p class="story-core__sentence">
+        <strong>Story core:</strong> From 2000→2023, Billboard pop trends shifted toward higher energy and danceability,
+        with clear “era jumps” that changed how songs feel—and who dominated those sounds.
+      </p>
+    </section>
+
+    <!-- Danceability Section -->
+    <section class="scroll-section" data-section="danceability">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>Measuring Danceability</h2>
+          <p>One of the most striking changes is in <em>danceability</em>—how suitable a track is for dancing based on tempo, rhythm stability, beat strength, and overall regularity.</p>
+          <p>Spotify measures this on a scale from 0.0 to 1.0, where 1.0 is the most danceable.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-danceability" class="visualization"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Distribution Section -->
+    <section class="scroll-section" data-section="distribution">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h3>The Distribution Has Shifted</h3>
+          <p class="callout">In 2000, the average song had a danceability score of 0.55. By 2023, this had increased to 0.68.</p>
+          <p>Here's the distribution of danceability scores across all songs in the dataset:</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-distribution" class="visualization"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trends Over Time Section -->
+    <section class="scroll-section" data-section="trends">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>The Rise of High-Energy Music</h2>
+          <p class="annotation">Energy represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy.</p>
+          <p>As streaming platforms took over, the energy level of popular music increased dramatically. Songs needed to grab attention immediately.</p>
+          <p class="annotation">In 2010, the energy of an average Billboard hit reached a turning point, climbing steadily ever since.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-trends" class="visualization"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Acoustic Decline Section -->
+    <section class="scroll-section" data-section="acoustic">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>The Decline of Acoustic Music</h2>
+          <p>At the same time, acoustic instrumentation has steadily decreased. The rise of electronic production and synthesized sounds has transformed the sonic landscape.</p>
+          <p class="annotation">2023 saw the lowest acousticness scores on record, with heavily produced tracks dominating the charts.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-acoustic" class="visualization"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3D Exploration Section -->
+    <section class="scroll-section full-height" data-section="3d-explore">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>Exploring the Full Spectrum</h2>
+          <p>When we plot songs across multiple dimensions—danceability, energy, and valence (musical positivity)—we can see distinct clusters emerge.</p>
+          <p class="annotation">Each sphere represents a year's worth of chart-topping hits. Notice how recent years (in warmer colors) cluster toward higher danceability and energy.</p>
+          <p>Scroll to rotate the visualization and explore different angles.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-3d" class="visualization large"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline Sphere Section -->
+    <section class="scroll-section full-height" data-section="timeline-sphere">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>The Timeline Sphere</h2>
+          <p>Imagine all 24 years of Billboard hits wrapped around a sphere. Each ring represents a year, with data points showing the sonic evolution as you orbit through time.</p>
+          <p class="annotation">The sphere rotates as you scroll, revealing how musical characteristics have transformed from 2000 to 2023.</p>
+          <p>Notice the shift from cooler (blue) tones in earlier years to warmer (red) tones in recent years, representing the increase in energy and danceability.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-timeline-sphere" class="visualization large"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sound Wave Visualization Section -->
+    <section class="scroll-section full-height" data-section="sound-wave">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>The Sound of Change</h2>
+          <p>As you scroll, watch the sound waves pulse and transform. The amplitude represents energy levels, while the frequency mirrors the tempo of popular music over time.</p>
+          <p class="annotation">The waveform becomes more intense and complex as we move toward recent years—a visual representation of modern pop's high-octane production.</p>
+          <p>The wave color shifts from cool to warm, tracking the rise in danceability scores.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-sound-wave" class="visualization large"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data Wave 3D Section -->
+    <section class="scroll-section full-height" data-section="data-wave">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>Riding the Data Wave</h2>
+          <p>This 3D wave visualization shows the ebb and flow of musical trends across our dataset. Each peak and valley represents fluctuations in song characteristics.</p>
+          <p class="annotation">The wave's height indicates the intensity of change. Notice the dramatic shifts around 2010 and 2015—key moments in music history.</p>
+          <p>The undulating surface reveals patterns invisible in traditional charts.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-data-wave" class="visualization large"></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Artist Deep Dive: Taylor Swift -->
+    <section class="scroll-section" data-section="artist-taylor">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>Artist Spotlight: Taylor Swift</h2>
+          <p>Taylor Swift's journey from country to pop is clearly visible in the data. Her early work showed lower danceability scores (0.45-0.55) with higher acousticness.</p>
+          <p class="annotation">Starting around 2014, her danceability scores jumped dramatically to 0.70+, marking her full transition to pop production.</p>
+          <p>Her evolution mirrors the broader industry shift, but she accelerated the trend, pulling country music into the pop mainstream.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-artist-taylor" class="visualization"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Artist Deep Dive: Drake -->
+    <section class="scroll-section" data-section="artist-drake">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>Artist Spotlight: Drake</h2>
+          <p>With the most Billboard Hot 100 hits of any artist in this dataset, Drake has dominated the charts through consistency and adaptation.</p>
+          <p class="annotation">His music maintains remarkably high danceability (averaging 0.78) while balancing energy and valence to create his signature moody, melodic sound.</p>
+          <p>The data reveals Drake's formula: danceable beats paired with emotional vocals—a combination that defined the 2010s.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-artist-drake" class="visualization"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Artist Deep Dive: The Weeknd -->
+    <section class="scroll-section" data-section="artist-weeknd">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>Artist Spotlight: The Weeknd</h2>
+          <p>The Weeknd's sonic signature sits at the intersection of high energy and dark valence—creating anthems that sound upbeat but feel melancholic.</p>
+          <p class="annotation">His average energy score of 0.72 combined with lower valence (0.38) creates his distinctive sound: party music for sad people.</p>
+          <p>This emotional complexity helped redefine mainstream R&B for the streaming era.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-artist-weeknd" class="visualization"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bubble Chart Artists Section -->
+    <section class="scroll-section" data-section="artists">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>Top Artists by Audio Characteristics</h2>
+          <p>Different artists have distinct sonic signatures. Some favor high-energy dance tracks, while others create more acoustic, mellow sounds.</p>
+          <p class="annotation">Bubble size represents the number of hits each artist had on the Hot 100 during this period.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-artists" class="visualization"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conclusion Section -->
+    <section class="scroll-section" data-section="conclusion">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <h2>What Does This Mean?</h2>
+          <p>Music evolves with culture, technology, and listener preferences. The shift toward more danceable, energetic tracks reflects how we consume music today—through streaming playlists, workout sessions, and social media moments.</p>
+          <p>The data tells a clear story: popular music has become more rhythmically driven, more produced, and optimized for immediate impact.</p>
+          <p class="callout">Whether this is a positive evolution or a loss of musical diversity is up for debate. But the numbers don't lie.</p>
+        </div>
+        <div class="viz-column sticky">
+          <div id="viz-conclusion" class="visualization"></div>
+        </div>
+      </div>
+    </section>
+  </article>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <p>Data source: Billboard Hot 100 (2000-2023) with Spotify Audio Features</p>
+      <p>Visualizations built with Three.js and D3.js</p>
+    </div>
+  </footer>
+
+  <!-- Libraries -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<!-- App code (order matters) -->
+<script src="js/data.js"></script>
+<script src="js/visualizations.js"></script>
+<script src="js/scroll.js"></script>
+<script src="js/narrative.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>

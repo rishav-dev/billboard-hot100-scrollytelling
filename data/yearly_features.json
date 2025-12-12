@@ -1,0 +1,98 @@
+[
+  {
+    "year": 2000,
+    "danceability": 0.6732111111111111,
+    "energy": 0.6998444444444444,
+    "valence": 0.5949811111111111,
+    "acousticness": 0.14364585,
+    "tempo": 118.04148888888889,
+    "loudness": -6.365888888888889,
+    "speechiness": 0.06328666666666667,
+    "instrumentalness": 0.011785811888888885,
+    "liveness": 0.14715888888888887
+  },
+  {
+    "year": 2001,
+    "danceability": 0.6563076923076924,
+    "energy": 0.6881758241758242,
+    "valence": 0.5899340659340659,
+    "acousticness": 0.16188154945054944,
+    "tempo": 114.42969230769232,
+    "loudness": -6.01,
+    "speechiness": 0.1008032967032967,
+    "instrumentalness": 0.01067711593406593,
+    "liveness": 0.16959230769230768
+  },
+  {
+    "year": 2002,
+    "danceability": 0.6681935483870968,
+    "energy": 0.707967741935484,
+    "valence": 0.5954322580645162,
+    "acousticness": 0.15716009569892472,
+    "tempo": 119.20327956989249,
+    "loudness": -5.735860215053764,
+    "speechiness": 0.11156344086021504,
+    "instrumentalness": 0.0049316947311827935,
+    "liveness": 0.165747311827957
+  },
+  {
+    "year": 2003,
+    "danceability": 0.663042105263158,
+    "energy": 0.6874631578947368,
+    "valence": 0.6060042105263158,
+    "acousticness": 0.1918896,
+    "tempo": 115.60706315789474,
+    "loudness": -5.816147368421053,
+    "speechiness": 0.14374631578947367,
+    "instrumentalness": 0.008890567263157893,
+    "liveness": 0.1719978947368421
+  },
+  {
+    "year": 2004,
+    "danceability": 0.6821911764705882,
+    "energy": 0.6795588235294118,
+    "valence": 0.587075,
+    "acousticness": 0.1702074411764706,
+    "tempo": 117.04423529411764,
+    "loudness": -5.915014705882353,
+    "speechiness": 0.13845294117647058,
+    "instrumentalness": 0.0009536226470588221,
+    "liveness": 0.158275
+  },
+  {
+    "year": 2006,
+    "danceability": 0.465,
+    "energy": 0.954,
+    "valence": 0.458,
+    "acousticness": 0.000346,
+    "tempo": 143.85,
+    "loudness": -4.251,
+    "speechiness": 0.044,
+    "instrumentalness": 5.38e-06,
+    "liveness": 0.5730000000000001
+  },
+  {
+    "year": 2012,
+    "danceability": 0.747,
+    "energy": 0.937,
+    "valence": 0.739,
+    "acousticness": 0.0208,
+    "tempo": 103.976,
+    "loudness": -5.746,
+    "speechiness": 0.0453,
+    "instrumentalness": 0.0,
+    "liveness": 0.29
+  },
+  {
+    "year": 2021,
+    "danceability": 0.7020000000000001,
+    "energy": 0.8250000000000001,
+    "valence": 0.915,
+    "acousticness": 0.00883,
+    "tempo": 102.977,
+    "loudness": -3.787,
+    "speechiness": 0.0601,
+    "instrumentalness": 0.0,
+    "liveness": 0.0674
+  }
+]

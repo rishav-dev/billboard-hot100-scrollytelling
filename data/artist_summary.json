@@ -1,0 +1,138 @@
+[
+  {
+    "artist": "3 Doors Down",
+    "count": 6,
+    "avgDanceability": 0.5368333333333334,
+    "avgEnergy": 0.711,
+    "avgValence": 0.37200000000000005,
+    "avgAcousticness": 0.020135
+  },
+  {
+    "artist": "Aaliyah",
+    "count": 6,
+    "avgDanceability": 0.7050000000000001,
+    "avgEnergy": 0.5576666666666666,
+    "avgValence": 0.6145,
+    "avgAcousticness": 0.32656666666666667
+  },
+  {
+    "artist": "Alicia Keys",
+    "count": 5,
+    "avgDanceability": 0.568,
+    "avgEnergy": 0.5182,
+    "avgValence": 0.3342,
+    "avgAcousticness": 0.46880000000000005
+  },
+  {
+    "artist": "Ashanti",
+    "count": 5,
+    "avgDanceability": 0.6836,
+    "avgEnergy": 0.7006,
+    "avgValence": 0.7218,
+    "avgAcousticness": 0.3494
+  },
+  {
+    "artist": "Beyonc\u00e9",
+    "count": 5,
+    "avgDanceability": 0.6588,
+    "avgEnergy": 0.533,
+    "avgValence": 0.6916,
+    "avgAcousticness": 0.126098
+  },
+  {
+    "artist": "Christina Aguilera",
+    "count": 6,
+    "avgDanceability": 0.6378333333333334,
+    "avgEnergy": 0.7513333333333333,
+    "avgValence": 0.5138666666666667,
+    "avgAcousticness": 0.25098333333333334
+  },
+  {
+    "artist": "Creed",
+    "count": 5,
+    "avgDanceability": 0.39699999999999996,
+    "avgEnergy": 0.6930000000000001,
+    "avgValence": 0.233,
+    "avgAcousticness": 0.0034125
+  },
+  {
+    "artist": "Eminem",
+    "count": 7,
+    "avgDanceability": 0.8027142857142857,
+    "avgEnergy": 0.7364285714285714,
+    "avgValence": 0.45420000000000005,
+    "avgAcousticness": 0.020331428571428573
+  },
+  {
+    "artist": "Ja Rule",
+    "count": 5,
+    "avgDanceability": 0.8354000000000001,
+    "avgEnergy": 0.737,
+    "avgValence": 0.6494,
+    "avgAcousticness": 0.07402
+  },
+  {
+    "artist": "Jagged Edge",
+    "count": 5,
+    "avgDanceability": 0.689,
+    "avgEnergy": 0.6346,
+    "avgValence": 0.636,
+    "avgAcousticness": 0.2684
+  },
+  {
+    "artist": "Jay-Z",
+    "count": 6,
+    "avgDanceability": 0.7585000000000001,
+    "avgEnergy": 0.7961666666666667,
+    "avgValence": 0.7170000000000001,
+    "avgAcousticness": 0.1299
+  },
+  {
+    "artist": "Jennifer Lopez",
+    "count": 8,
+    "avgDanceability": 0.765875,
+    "avgEnergy": 0.736375,
+    "avgValence": 0.746125,
+    "avgAcousticness": 0.1254275
+  },
+  {
+    "artist": "Ludacris",
+    "count": 6,
+    "avgDanceability": 0.7595000000000001,
+    "avgEnergy": 0.809,
+    "avgValence": 0.6638333333333334,
+    "avgAcousticness": 0.20131666666666667
+  },
+  {
+    "artist": "Missy Elliott",
+    "count": 6,
+    "avgDanceability": 0.7701666666666668,
+    "avgEnergy": 0.626,
+    "avgValence": 0.574,
+    "avgAcousticness": 0.23603333333333332
+  },
+  {
+    "artist": "Nelly",
+    "count": 8,
+    "avgDanceability": 0.767875,
+    "avgEnergy": 0.6312500000000001,
+    "avgValence": 0.6723750000000001,
+    "avgAcousticness": 0.11064875
+  },
+  {
+    "artist": "R. Kelly",
+    "count": 5,
+    "avgDanceability": 0.6984,
+    "avgEnergy": 0.529,
+    "avgValence": 0.8062000000000001,
+    "avgAcousticness": 0.12265999999999999
+  },
+  {
+    "artist": "Usher",
+    "count": 7,
+    "avgDanceability": 0.7804285714285715,
+    "avgEnergy": 0.5627142857142857,
+    "avgValence": 0.6895714285714286,
+    "avgAcousticness": 0.13034285714285715
+  }
+]
