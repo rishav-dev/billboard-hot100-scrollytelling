@@ -114,31 +114,19 @@ const ScrollController = {
         break;
       case "artist-taylor":
         if (ratio > 0.3 && !this.visualizations.artistTaylor) {
-          Visualizations.renderArtistRadar(
-            "viz-artist-taylor",
-            "Taylor Swift",
-            billboardData
-          );
+          Visualizations.renderArtistRadar("viz-artist-taylor", "Taylor Swift");
           this.visualizations.artistTaylor = true;
         }
         break;
       case "artist-drake":
         if (ratio > 0.3 && !this.visualizations.artistDrake) {
-          Visualizations.renderArtistRadar(
-            "viz-artist-drake",
-            "Drake",
-            billboardData
-          );
+          Visualizations.renderArtistRadar("viz-artist-drake", "Drake");
           this.visualizations.artistDrake = true;
         }
         break;
       case "artist-weeknd":
         if (ratio > 0.3 && !this.visualizations.artistWeeknd) {
-          Visualizations.renderArtistRadar(
-            "viz-artist-weeknd",
-            "The Weeknd",
-            billboardData
-          );
+          Visualizations.renderArtistRadar("viz-artist-weeknd", "The Weeknd");
           this.visualizations.artistWeeknd = true;
         }
         break;

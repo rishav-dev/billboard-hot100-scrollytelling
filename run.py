@@ -19,6 +19,5 @@ def open_browser():
 
 with socketserver.TCPServer(("", PORT), Handler) as httpd:
     print(f"Serving at http://localhost:{PORT}/index.html")
-    # Open browser after a short delay so server is ready
     threading.Timer(1.0, open_browser).start()
     httpd.serve_forever()

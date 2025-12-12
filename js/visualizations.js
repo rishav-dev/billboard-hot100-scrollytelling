@@ -266,169 +266,195 @@ const Visualizations = {
 
   // 3D Scatter Plot
   init3DScatter(containerId, data) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-
-  container.innerHTML = `
-    <h3 class="chart-title">Multi-Dimensional Music Space</h3>
-    <p class="chart-subtitle">Each point is a song • Position: danceability/energy/valence • Color: year</p>
-
-    <div id="canvas-3d" style="position:relative;">
-      <div id="tooltip-3d" class="tooltip"></div>
-    </div>
-  `;
-
-
-  const canvasContainer = container.querySelector('#canvas-3d');
-  const tooltip = container.querySelector('#tooltip-3d');
-
-  const width = container.clientWidth;
-  const height = 520;
-
-  const N = Math.min(3000, data.length);
-  const sampled = d3.shuffle([...data]).slice(0, N);
-
-  const sx = d3.scaleLinear().domain([0, 1]).range([-5, 5]); // danceability
-  const sy = d3.scaleLinear().domain([0, 1]).range([-5, 5]); // energy
-  const sz = d3.scaleLinear().domain([0, 1]).range([-5, 5]); // valence
-
-  const colorScale = d3.scaleSequential(d3.interpolateTurbo).domain([2000, 2023]);
-
-
-  const popVals = sampled.map(d => d.popularity ?? 50);
-  const sizeScale = d3.scaleSqrt().domain([d3.min(popVals), d3.max(popVals)]).range([0.05, 0.18]);
-
-  const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0xffffff, 10, 35);
-
-  const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-  camera.position.set(10, 7, 10);
-  camera.lookAt(0, 0, 0);
-
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setSize(width, height);
-  renderer.setClearColor(0xffffff, 0);
-  canvasContainer.appendChild(renderer.domElement);
-
-  // Lights
-  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-  const dir = new THREE.DirectionalLight(0xffffff, 0.6);
-  dir.position.set(8, 10, 8);
-  scene.add(dir);
-
-  // Axes helper + labels 
-  const axes = new THREE.AxesHelper(6);
-  scene.add(axes);
-
-  function makeAxisLabel(text, x, y, z) {
-    const div = document.createElement('div');
-    div.style.position = 'absolute';
-    div.style.fontSize = '12px';
-    div.style.fontWeight = '600';
-    div.style.color = '#333';
-    div.style.pointerEvents = 'none';
-    div.innerText = text;
-    canvasContainer.appendChild(div);
-
-    return { div, pos: new THREE.Vector3(x, y, z) };
-  }
-
-  const labels = [
-    makeAxisLabel('Danceability →', 6, 0, 0),
-    makeAxisLabel('Energy ↑', 0, 6, 0),
-    makeAxisLabel('Valence ↗', 0, 0, 6),
-  ];
-
-  // Build points as InstancedMesh
-  const geometry = new THREE.SphereGeometry(1, 10, 10);
-  const material = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0.85 });
-
-  const mesh = new THREE.InstancedMesh(geometry, material, sampled.length);
-  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  scene.add(mesh);
-
-  const dummy = new THREE.Object3D();
-  const colors = new Float32Array(sampled.length * 3);
-  const color = new THREE.Color();
-
-  sampled.forEach((d, i) => {
-    dummy.position.set(sx(d.danceability), sy(d.energy), sz(d.valence));
-    const r = sizeScale(d.popularity ?? 50);
-    dummy.scale.set(r, r, r);
-    dummy.updateMatrix();
-    mesh.setMatrixAt(i, dummy.matrix);
-
-    color.set(colorScale(d.year));
-    colors[i * 3 + 0] = color.r;
-    colors[i * 3 + 1] = color.g;
-    colors[i * 3 + 2] = color.b;
-  });
-
-  mesh.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
-
-  // Hover picking
-  const raycaster = new THREE.Raycaster();
-  const pointer = new THREE.Vector2();
-
-  function onPointerMove(e) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-    raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster.intersectObject(mesh);
-
-    if (hits.length) {
-      const idx = hits[0].instanceId;
-      const d = sampled[idx];
-
-      tooltip.classList.add('visible');
-      tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
-      tooltip.style.top = (e.clientY - rect.top + 12) + 'px';
-      tooltip.innerHTML = `
-        <div style="font-weight:700">${d.song ?? d.title ?? 'Song'}</div>
-        <div style="opacity:.85">${d.band_singer ?? d.artist ?? 'Artist'} • ${d.year}</div>
-        <div style="opacity:.85">dance ${d.danceability?.toFixed?.(2)} • energy ${d.energy?.toFixed?.(2)} • valence ${d.valence?.toFixed?.(2)}</div>
-      `;
-    } else {
-      tooltip.classList.remove('visible');
-    }
-  }
-
-  renderer.domElement.addEventListener('mousemove', onPointerMove);
-  renderer.domElement.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
-
-  // Animate orbit
-  let t = 0;
-  function animate() {
-    requestAnimationFrame(animate);
-    t += 0.003;
-    camera.position.x = Math.cos(t) * 13;
-    camera.position.z = Math.sin(t) * 13;
-    camera.lookAt(0, 0, 0);
-    renderer.render(scene, camera);
-
-    // project axis labels
-    labels.forEach(l => {
-      const p = l.pos.clone().project(camera);
-      const x = (p.x * 0.5 + 0.5) * width;
-      const y = (-p.y * 0.5 + 0.5) * height;
-      l.div.style.transform = `translate(${x}px, ${y}px)`;
-    });
-    
-  }
+    const container = document.getElementById(containerId);
+    if (!container) return;
 
   
+    container.style.position = "relative";
+
+    container.innerHTML = `
+      <h3 class="chart-title">Multi-Dimensional Music Space</h3>
+      <p class="chart-subtitle">Each point is a song • Position: danceability/energy/valence • Color: year</p>
+      <div id="canvas-3d" style="position:relative; height:520px;"></div>
+      <div class="axis-label-3d axis-energy">Energy ↑</div>
+      <div class="axis-label-3d axis-dance">Danceability →</div>
+      <div class="axis-label-3d axis-valence">Valence ↗</div>
+      <div id="tooltip-3d" class="tooltip"></div>
+    `;
+
+    const canvasContainer = container.querySelector("#canvas-3d");
+    const tooltip         = container.querySelector("#tooltip-3d");
+    const lblEnergy       = container.querySelector(".axis-energy");
+    const lblDance        = container.querySelector(".axis-dance");
+    const lblValence      = container.querySelector(".axis-valence");
+
+    [lblEnergy, lblDance, lblValence].forEach((l) => {
+      l.style.position = "absolute";
+      l.style.left = "0px";
+      l.style.top = "0px";
+      l.style.fontSize = "12px";
+      l.style.fontWeight = "600";
+      l.style.color = "#333";
+      l.style.pointerEvents = "none";
+    });
+
+    const width  = canvasContainer.clientWidth;
+    const height = 520;
+
+    const N = Math.min(3000, data.length);
+    const sampled = d3.shuffle([...data]).slice(0, N);
+
+    const sx = d3.scaleLinear().domain([0, 1]).range([-5, 5]); 
+    const sy = d3.scaleLinear().domain([0, 1]).range([-5, 5]); 
+    const sz = d3.scaleLinear().domain([0, 1]).range([-5, 5]); 
+
+    const colorScale = d3.scaleSequential(d3.interpolateTurbo).domain([2000, 2023]);
+
+    const popVals = sampled.map((d) => d.popularity ?? 50);
+    const sizeScale = d3
+      .scaleSqrt()
+      .domain([d3.min(popVals), d3.max(popVals)])
+      .range([0.05, 0.18]);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0xffffff, 10, 35);
+
+    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+    camera.position.set(10, 7, 10);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setClearColor(0xffffff, 0);
+    canvasContainer.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.6);
+    dir.position.set(8, 10, 8);
+    scene.add(dir);
+
+    const axes = new THREE.AxesHelper(6);
+    scene.add(axes);
+
+    // 3D positions of axis label anchors
+    const axisPositions = {
+      energy:  new THREE.Vector3(0, 6, 0),
+      dance:   new THREE.Vector3(6, 0, 0),
+      valence: new THREE.Vector3(0, 0, 6),
+    };
+
+    // instanced points
+    const geometry = new THREE.SphereGeometry(1, 10, 10);
+    const material = new THREE.MeshStandardMaterial({
+      transparent: true,
+      opacity: 0.85,
+    });
+
+    const mesh = new THREE.InstancedMesh(geometry, material, sampled.length);
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    scene.add(mesh);
+
+    const dummy = new THREE.Object3D();
+    const colors = new Float32Array(sampled.length * 3);
+    const color  = new THREE.Color();
+
+    sampled.forEach((d, i) => {
+      dummy.position.set(
+        sx(+d.danceability || 0),
+        sy(+d.energy || 0),
+        sz(+d.valence || 0)
+      );
+      const r = sizeScale(d.popularity ?? 50);
+      dummy.scale.set(r, r, r);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+
+      color.set(colorScale(+d.year || 2000));
+      colors[i * 3 + 0] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+    });
+
+    mesh.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
+
+    // hover picking
+    const raycaster = new THREE.Raycaster();
+    const pointer   = new THREE.Vector2();
+
+    function onPointerMove(e) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObject(mesh);
+
+      if (hits.length) {
+        const idx = hits[0].instanceId;
+        const d = sampled[idx];
+
+        tooltip.classList.add("visible");
+        tooltip.style.left = e.clientX - rect.left + 12 + "px";
+        tooltip.style.top  = e.clientY - rect.top + 12 + "px";
+        tooltip.innerHTML = `
+          <div style="font-weight:700">${d.song ?? d.title ?? "Song"}</div>
+          <div style="opacity:.85">${d.band_singer ?? d.artist ?? "Artist"} • ${d.year}</div>
+          <div style="opacity:.85">
+            dance ${(+d.danceability || 0).toFixed(2)} •
+            energy ${(+d.energy || 0).toFixed(2)} •
+            valence ${(+d.valence || 0).toFixed(2)}
+          </div>
+        `;
+      } else {
+        tooltip.classList.remove("visible");
+      }
+    }
+
+    renderer.domElement.addEventListener("mousemove", onPointerMove);
+    renderer.domElement.addEventListener("mouseleave", () =>
+      tooltip.classList.remove("visible")
+    );
+
+    // animation + axis label projection
+    let t = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      t += 0.003;
+
+      camera.position.x = Math.cos(t) * 13;
+      camera.position.z = Math.sin(t) * 13;
+      camera.lookAt(0, 0, 0);
+
+      renderer.render(scene, camera);
+
+      const canvasRect    = renderer.domElement.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const w  = canvasRect.width;
+      const h  = canvasRect.height;
+      const ox = canvasRect.left - containerRect.left;
+      const oy = canvasRect.top  - containerRect.top;
+
+      function placeLabel(labelEl, pos) {
+        const p = pos.clone().project(camera);
+        const x = ox + (p.x * 0.5 + 0.5) * w;
+        const y = oy + (-p.y * 0.5 + 0.5) * h;
+        labelEl.style.transform = `translate(${x}px, ${y}px)`;
+      }
+
+      placeLabel(lblEnergy,  axisPositions.energy);
+      placeLabel(lblDance,   axisPositions.dance);
+      placeLabel(lblValence, axisPositions.valence);
+    }
+
   animate();
 
-  window.addEventListener('resize', () => {
-    const newWidth = container.clientWidth;
+  window.addEventListener("resize", () => {
+    const newWidth = canvasContainer.clientWidth;
     camera.aspect = newWidth / height;
     camera.updateProjectionMatrix();
     renderer.setSize(newWidth, height);
   });
 },
-
 
   // Timeline Sphere - 3D rotating sphere with years as rings
   initTimelineSphere(containerId, data) {
@@ -493,7 +519,7 @@ const Visualizations = {
   const colorScale = d3.scaleSequential(d3.interpolateRdYlBu)
     .domain([2023, 2000]);
 
-  // Build “latitude” rings: each year is a ring of points around a sphere
+  // Build “latitude” rings
   const radius = 5;
   const pointsPerRing = 44;
 
@@ -501,7 +527,7 @@ const Visualizations = {
     const songs = yearGroups.get(year) || [];
     const avgEnergy = d3.mean(songs, d => d.energy) ?? 0.5;
 
-    // map year index to latitude [-pi/2, +pi/2]
+    // map year index to latitude
     const lat = (idx / (years.length - 1)) * Math.PI - Math.PI / 2;
 
     // thickness based on energy
@@ -537,7 +563,7 @@ const Visualizations = {
   );
   globe.add(outline);
 
-  // Fit camera (safety)
+  // Fit camera 
   const box = new THREE.Box3().setFromObject(globe);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
@@ -688,7 +714,7 @@ const Visualizations = {
       ctx.fillText(String(yr), x - 12, padT + innerH + 22);
     }
 
-    // Draw the “wave”: energy line, thickness from danceability
+    // Draw the wave
     const points = yearlyEnergy.map(d => ({
       year: d.year,
       e: d.value,
@@ -935,38 +961,76 @@ const Visualizations = {
   });
 },
 
-
-  // Artist-specific radar chart
-  renderArtistRadar(containerId, artistName, data) {
+  // Sonic Radar Graph: hard-coded comparison of Taylor Swift, Drake, The Weeknd
+  renderArtistRadar(containerId, focusArtist) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    // Filter data for this artist
-    const artistSongs = data.filter((d) => d.artist === artistName);
-    if (artistSongs.length === 0) {
-      artistSongs.push(...data.slice(0, 20)); 
+    //  static artist profiles (0–1, already normalized-ish) 
+    const artists = [
+      {
+        id: "taylor",
+        name: "Taylor Swift",
+        songs: 31,
+        color: "#e85d75",
+        metrics: {
+          danceability: 0.66,
+          energy:       0.59,
+          valence:      0.56,
+          acousticness: 0.36,
+          tempo:        0.57
+        }
+      },
+      {
+        id: "drake",
+        name: "Drake",
+        songs: 40,
+        color: "#1dd3b0",
+        metrics: {
+          danceability: 0.78,
+          energy:       0.64,
+          valence:      0.52,
+          acousticness: 0.21,
+          tempo:        0.60
+        }
+      },
+      {
+        id: "weeknd",
+        name: "The Weeknd",
+        songs: 18,
+        color: "#7b5cff",
+        metrics: {
+          danceability: 0.72,
+          energy:       0.72,
+          valence:      0.38,
+          acousticness: 0.14,
+          tempo:        0.63
+        }
+      }
+    ];
+
+    // Which artist should be highlighted in this section?
+    function guessFocusId(name) {
+      const n = (name || "").toLowerCase();
+      if (n.includes("drake")) return "drake";
+      if (n.includes("weeknd")) return "weeknd";
+      if (n.includes("weeknd")) return "weeknd";
+      return "taylor";
     }
+    const focusId = guessFocusId(focusArtist);
+    artists.forEach(a => (a.isFocus = a.id === focusId));
 
-    const avgMetrics = {
-      danceability: d3.mean(artistSongs, (d) => d.danceability),
-      energy: d3.mean(artistSongs, (d) => d.energy),
-      valence: d3.mean(artistSongs, (d) => d.valence),
-      acousticness: d3.mean(artistSongs, (d) => d.acousticness),
-      tempo: (d3.mean(artistSongs, (d) => d.tempo) || 0) / 200, 
-    };
+    //  build container + svg 
+    container.innerHTML = `
+      <h3 class="chart-title">Sonic Fingerprint</h3>
+      <p class="chart-subtitle">
+        Comparing Taylor Swift, Drake, and The Weeknd across five audio features
+      </p>
+      <svg></svg>
+    `;
 
-    const overallAvg = {
-      danceability: d3.mean(data, (d) => d.danceability),
-      energy: d3.mean(data, (d) => d.energy),
-      valence: d3.mean(data, (d) => d.valence),
-      acousticness: d3.mean(data, (d) => d.acousticness),
-      tempo: (d3.mean(data, (d) => d.tempo) || 0) / 200,
-    };
-
-    container.innerHTML = `<h3 class="chart-title">${artistName}'s Sonic Profile</h3><svg></svg>`;
-
-    const width = container.clientWidth;
-    const height = 500;
+    const width  = container.clientWidth || 600;
+    const height = 420;
     const margin = 80;
     const radius = Math.min(width, height) / 2 - margin;
 
@@ -977,134 +1041,154 @@ const Visualizations = {
       .append("g")
       .attr("transform", `translate(${width / 2},${height / 2})`);
 
-    const metrics = Object.keys(avgMetrics);
+    const metrics = [
+      { key: "danceability", label: "Danceability" },
+      { key: "energy",       label: "Energy" },
+      { key: "valence",      label: "Valence (mood)" },
+      { key: "acousticness", label: "Acousticness" },
+      { key: "tempo",        label: "Tempo (normalized)" }
+    ];
     const angleSlice = (Math.PI * 2) / metrics.length;
 
-    // Circular grid
-    const levels = 5;
-    for (let i = 1; i <= levels; i++) {
-      const levelRadius = (radius * i) / levels;
-
+    //  background grid
+    const levels = [0.2, 0.4, 0.6, 0.8, 1.0];
+    levels.forEach((lvl) => {
+      const r = radius * lvl;
       svg
         .append("circle")
-        .attr("r", levelRadius)
+        .attr("r", r)
         .attr("fill", "none")
-        .attr("stroke", "#ddd")
+        .attr("stroke", "#e0e0e0")
         .attr("stroke-width", 1);
-    }
 
-    // Axes
-    metrics.forEach((metric, i) => {
+      svg
+        .append("text")
+        .attr("x", 0)
+        .attr("y", -r - 4)
+        .attr("text-anchor", "middle")
+        .style("font-size", "10px")
+        .style("fill", "#999")
+        .text(lvl.toFixed(1));
+    });
+
+    //  axes + axis labels 
+    metrics.forEach((m, i) => {
       const angle = angleSlice * i - Math.PI / 2;
       const x = Math.cos(angle) * radius;
       const y = Math.sin(angle) * radius;
 
+      // axis line
       svg
         .append("line")
         .attr("x1", 0)
         .attr("y1", 0)
         .attr("x2", x)
         .attr("y2", y)
-        .attr("stroke", "#ccc")
+        .attr("stroke", "#cccccc")
         .attr("stroke-width", 1);
 
+      // axis label
       svg
         .append("text")
-        .attr("x", x * 1.15)
-        .attr("y", y * 1.15)
+        .attr("x", x * 1.17)
+        .attr("y", y * 1.17)
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")
-        .style("font-size", "13px")
-        .style("font-weight", "bold")
-        .text(metric.charAt(0).toUpperCase() + metric.slice(1));
+        .style("font-size", "12px")
+        .style("font-weight", "600")
+        .style("fill", "#333")
+        .text(m.label);
     });
 
-    // Overall average (gray)
-    const overallPoints = metrics.map((metric, i) => {
-      const angle = angleSlice * i - Math.PI / 2;
-      const value = overallAvg[metric] || 0;
-      return {
-        x: Math.cos(angle) * radius * value,
-        y: Math.sin(angle) * radius * value,
-      };
-    });
-
-    const pathLine = d3
+    const line = d3
       .line()
       .x((d) => d.x)
-      .y((d) => d.y);
+      .y((d) => d.y)
+      .curve(d3.curveLinearClosed);
 
-    svg
-      .append("path")
-      .datum([...overallPoints, overallPoints[0]])
-      .attr("d", pathLine)
-      .attr("fill", "#e0e0e0")
-      .attr("fill-opacity", 0.3)
-      .attr("stroke", "#999")
-      .attr("stroke-width", 2);
+    function pointsForArtist(a) {
+      return metrics.map((m, i) => {
+        const angle = angleSlice * i - Math.PI / 2;
+        const value = Math.max(0, Math.min(1, a.metrics[m.key] || 0));
+        return {
+          x: Math.cos(angle) * radius * value,
+          y: Math.sin(angle) * radius * value
+        };
+      });
+    }
 
-    // Artist data
-    const artistPoints = metrics.map((metric, i) => {
-      const angle = angleSlice * i - Math.PI / 2;
-      const value = avgMetrics[metric] || 0;
-      return {
-        x: Math.cos(angle) * radius * value,
-        y: Math.sin(angle) * radius * value,
-      };
+    // draw non-highlighted artists first, then highlighted on top
+    const drawOrder = artists
+      .slice()
+      .sort((a, b) => (a.isFocus === b.isFocus ? 0 : a.isFocus ? 1 : -1));
+
+    drawOrder.forEach((a) => {
+      const pts = pointsForArtist(a);
+      const group = svg.append("g");
+
+      group
+        .append("path")
+        .datum(pts)
+        .attr("d", line)
+        .attr("fill", a.color)
+        .attr("fill-opacity", a.isFocus ? 0.40 : 0.16)
+        .attr("stroke", a.color)
+        .attr("stroke-width", a.isFocus ? 3 : 2);
+
+      if (a.isFocus) {
+        // highlight points with dots
+        group
+          .selectAll("circle")
+          .data(pts)
+          .enter()
+          .append("circle")
+          .attr("cx", (d) => d.x)
+          .attr("cy", (d) => d.y)
+          .attr("r", 4)
+          .attr("fill", a.color);
+      }
     });
 
-    svg
-      .append("path")
-      .datum([...artistPoints, artistPoints[0]])
-      .attr("d", pathLine)
-      .attr("fill", "#e85d75")
-      .attr("fill-opacity", 0.4)
-      .attr("stroke", "#e85d75")
-      .attr("stroke-width", 3);
+    //  legend 
+    const legendRoot = d3
+      .select(`#${containerId} svg`)
+      .append("g")
+      .attr(
+        "transform",
+        `translate(${margin}, ${height - margin + 8})`
+      );
 
-    // Dots
-    artistPoints.forEach((point) => {
-      svg
-        .append("circle")
-        .attr("cx", point.x)
-        .attr("cy", point.y)
-        .attr("r", 5)
-        .attr("fill", "#e85d75");
-    });
-
-    // Legend
-    const legend = svg.append("g").attr(
-      "transform",
-      `translate(${-radius}, ${radius + 30})`
-    );
+    const legend = legendRoot
+      .selectAll(".legend-item")
+      .data(artists)
+      .enter()
+      .append("g")
+      .attr("class", "legend-item")
+      .attr("transform", (_, i) => `translate(${i * 200}, 0)`);
 
     legend
       .append("rect")
-      .attr("width", 15)
-      .attr("height", 15)
-      .attr("fill", "#e85d75");
+      .attr("width", 14)
+      .attr("height", 14)
+      .attr("rx", 3)
+      .attr("ry", 3)
+      .attr("fill", (d) => d.color)
+      .attr("opacity", (d) => (d.isFocus ? 1 : 0.7));
 
     legend
       .append("text")
       .attr("x", 20)
-      .attr("y", 12)
+      .attr("y", 11)
       .style("font-size", "12px")
-      .text(artistName);
-
-    legend
-      .append("rect")
-      .attr("y", 20)
-      .attr("width", 15)
-      .attr("height", 15)
-      .attr("fill", "#999");
-
-    legend
-      .append("text")
-      .attr("x", 20)
-      .attr("y", 32)
-      .style("font-size", "12px")
-      .text("Average Artist");
+      .style("fill", "#333")
+      .text((d) => {
+        const base = `${d.name} (${d.songs} songs)`;
+        return d.isFocus ? `${base} • highlighted` : base;
+      });
   },
+
+
+
 
   // Bubble Chart for Artists
   renderArtistBubbles(containerId, _data) {
