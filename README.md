@@ -17,7 +17,7 @@ By analyzing thousands of Billboard Hot 100 entries and their audio characterist
 * Multi‑dimensional 3D explorations of music space
 * Artist‑level deep dives (e.g., Taylor Swift, Drake, The Weeknd)
 
-The experience is designed as an interactive narrative rather than a static dashboard.
+The page is an interactive narrative you scroll through, not a dashboard.
 
 ---
 
@@ -99,7 +99,7 @@ Missing or invalid numeric values are normalized to `null` and filtered where ap
 * **Energy Waveform**: animated canvas showing era shifts
 * **Evolution Ribbon**: 3D tube tracing music evolution over time
 
-All 3D views are explanatory rather than purely decorative—axes, color encodings, and motion are tied directly to data semantics.
+Each 3D view maps axes, color, and motion to a specific data variable.
 
 ---
 
@@ -137,13 +137,3 @@ http://localhost:8000
 * Right‑click `index.html` → **Open with Live Server**
 
 ---
-
-## Design Philosophy
-
-* **Narrative first**: visualizations support a story rather than compete for attention
-* **Progressive disclosure**: complexity increases as the reader scrolls
-* **Interpretability**: colors, motion, and geometry always map to data meaning
-* **Exploration without overwhelm**: interactivity is subtle and guided
-
----
-
